@@ -1,0 +1,33 @@
+{
+  "name": "home-automation-hub",
+  "version": "1.0.0",
+  "description": "Natural language home automation hub",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidyuzhang/home-automation-hub.git"
+  },
+  "keywords": [
+    "home",
+    "automation",
+    "wit",
+    "nlp",
+    "voice"
+  ],
+  "author": "David Zhang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidyuzhang/home-automation-hub/issues"
+  },
+  "homepage": "https://github.com/davidyuzhang/home-automation-hub",
+  "dependencies": {
+    "home-controller": "^0.5.2",
+    "express": "^4.11.2",
+    "node-wit": "^1.1.0",
+    "colors": "^1.0.3"
+  }
+}
