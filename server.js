@@ -27,8 +27,6 @@ var WitIntentResponder = function WitIntentResponder(access_token, confidence_th
   this.processText = function(text, callback) {
     var self = this; 
 
-    console.log(util.inspect(this.handlers));
-
     wit.captureTextIntent(this.witApiKey, text, function(error, response) { 
       if (error) {
         console.log(error);
@@ -117,5 +115,5 @@ var server = app.listen(config.app.listen_port, '0.0.0.0', function () {
   var host = server.address().address
   var port = server.address().port
 
-  console.log('Example app listening at http://%s:%s', host, port) 
+  console.log('Home-automation application listening at http://%s:%s', host, port) 
 });

@@ -87,6 +87,26 @@ var Handler = {
     } else {
       callback(util.format('sorry, i\'m not sure what light that is'));
     }
+  },
+
+  // Handles requests to change the scenes inside of the house (i.e. set scene away,
+  // set scene home). We require a scene entity to map to the correct scene ID on the insteon
+  // hub. 
+  //
+  scene_change: function(response, callback) { 
+    console.log('[wit.scene_change] response=%s', util.inspect(response, { depth: 3 } ));
+
+    var scene = response.entities.scene[0].value;
+    var scene_detail = findByName(scenes, scene);
+    
+    console.log(util.format('[wit.scene_change] Setting scene in %s %s', scene, util.inspect(scene_detail)));
+
+    if (scene_detail) {
+      hub.sceneOn(scene_detail.id);
+      callback(util.format('Set the scene %s', scene));
+    } else { 
+      callback('Not sure what scene that is');
+    }
   }
 }
 
