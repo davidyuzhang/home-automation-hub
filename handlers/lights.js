@@ -89,6 +89,54 @@ var Handler = {
     }
   },
 
+  // Handles the lights_change_relative intent (i.e. "Dim the hallway lights") from the user.
+  // We require a room and a direction entity in this intent.
+  //
+  lights_change_relative: function(response, callback) { 
+    console.log('[wit.lights_change_relative] response=%s', util.inspect(response, { depth: 3 } ));
+
+    var room = response.entities.room ? response.entities.room[0].value : response.entities.local_search_query[0].value;
+    var direction = response.entities.direction[0].value;
+
+    var light_detail = findByName(lights, room);
+
+    console.log(util.format('[wit.lights_change_relative] Setting lights in %s to %s light_obj:%s', room, direction, util.inspect(light_detail)));
+
+    if (light_detail) {
+      var light = hub.light(light_detail.id);
+      light.level().then(function(level) {
+        var new_level = direction == 'up' ? Math.min(100, level + 25) : Math.max(0, level - 25);
+        console.log('[wit.lights_change_relative] current level is %d, setting to %d', level, new_level);
+        light.level(new_level);
+	callback(util.format('turning %s lights %s', room, new_level));
+      });
+    } else {
+      callback(util.format('sorry, i\'m not sure what light that is'));
+    }
+  },
+
+  // Handles the lights_change_with_level intent (i.e. "Set the kitchen lights to 65%") from the
+  // user.  We require a room and a level for this intent.
+  //
+  lights_change_with_level: function(response, callback) { 
+    console.log('[wit.lights_change_with_level] response=%s', util.inspect(response, { depth: 3 } ));
+
+    var room = response.entities.room ? response.entities.room[0].value : response.entities.local_search_query[0].value;
+    var level = response.entities.level[0].value;
+
+    var light_detail = findByName(lights, room);
+
+    console.log(util.format('[wit.lights_change_with_level] Setting lights in %s to %s light_obj:%s', room, level, util.inspect(light_detail)));
+
+    if (light_detail) {
+      var light = hub.light(light_detail.id);
+      light.level(level);
+      callback(util.format('turning %s lights %s', room, level));
+    } else {
+      callback(util.format('sorry, i\'m not sure what light that is'));
+    }
+  },
+
   // Handles requests to change the scenes inside of the house (i.e. set scene away,
   // set scene home). We require a scene entity to map to the correct scene ID on the insteon
   // hub. 

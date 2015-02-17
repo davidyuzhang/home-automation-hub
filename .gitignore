@@ -1,3 +1,7 @@
 # Skip dependency directory
 # Will be install by npm install
 node_modules
+
+# Skip configuration files that should
+# not be checked into source control
+config.production.js

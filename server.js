@@ -45,18 +45,22 @@ var WitIntentResponder = function WitIntentResponder(access_token, confidence_th
 
 var responder = new WitIntentResponder(config.wit.access_token, config.wit.min_confidence_threshold);
 
-var handler = require('./handlers/lights.js');
-for (var property in handler) {
-  if (handler.hasOwnProperty(property)) { 
-      if (handler[property].length != 2) { 
-        console.log('[wit] handler function %s doesn\'t have the required number of arguments, skipping');
-        continue;
-      }
+var files = fs.readdirSync('./handlers');
+for (var i in files) { 
+  console.log(colors.green('[main] processing handlers in %s'), files[i]);
+  var handler = require('./handlers/' + files[i]);
+  for (var property in handler) {
+    if (handler.hasOwnProperty(property)) { 
+        if (handler[property].length != 2) { 
+          console.log('[wit] handler function %s doesn\'t have the required number of arguments, skipping');
+          continue;
+        }
 
-      console.log(colors.green('[wit] adding handler %s'), property);
-      responder.setIntentHandler(property, handler[property]);
-  } 
-}
+        console.log(colors.green('[main] adding handler %s'), property);
+        responder.setIntentHandler(property, handler[property]);
+    } 
+  }
+} 
 
 app.get('/request', function(req, res) {
   var query = req.query.q;
