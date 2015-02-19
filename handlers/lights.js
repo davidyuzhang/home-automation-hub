@@ -1,5 +1,6 @@
 var Insteon = require('home-controller').Insteon,
     fs = require('fs'),
+    async = require('async'),
     hub = new Insteon(),
     util = require('util');
 
@@ -135,6 +136,76 @@ var Handler = {
     } else {
       callback(util.format('sorry, i\'m not sure what light that is'));
     }
+  },
+
+  // Handles the lights_change_all intent (i.e. "Turn off all of the lights") from the user.
+  // We require a on_off entity to set the lights to the right state.
+  // 
+  lights_change_all: function(response, callback) {
+    console.log('[wit.lights_change_all] response=%s', util.inspect(response, { depth: 3 } ));
+
+    var state = response.entities.on_off[0].value;
+
+    for (var i in lights) {
+      var item = lights[i];
+      if (state == "toggle") {
+        // Todo: Add switch logic
+      } else {
+        var light = hub.light(item.id);
+        if (state == "on") {
+          light.turnOn();
+        } else {
+          light.turnOff();
+        }
+      }  
+    }
+
+    callback('Set all of the lights in the house')
+  },
+
+  // Handles the lights_query_all intent from the user.
+  lights_query_all: function(response, callback) { 
+    console.log('[wit.lights_query_all] response=%s', util.inspect(response, { depth: 3 } ));
+    var state = response.entities.on_off[0].value;
+
+    // Used in async.map to fetch all of the light results in parallel
+    var fn = function(i, c) {
+      console.log('[wit.lights_query_all] fetching details for light %s', util.inspect(i));
+
+      if (i.id == "") {
+        c(null, { light: i, state: "unknown" });
+      } else { 
+        hub.light(i.id).level().then(function (l) { 
+          c(null, { light: i, state: l });
+        });
+      }
+    };
+
+    async.map(lights, fn, function(error, results) { 
+       console.log(util.inspect(results, { depth: 3 }));
+       var text = results.reduce(function (p, c, i) { 
+         // If the user only requests lights that are on
+         if (state == "on") { 
+           if (c.state > 0) {
+             return p + ', ' + c.light.name + ' is on';
+           }
+         } else if (state == "off") { 
+           if (c.state == 0) {
+             return p + ', ' + c.light.name + ' is off'; 
+           }
+         } else { 
+           if (c.state == 0) { 
+             return p + ', ' + c.light.name + ' is off'; 
+           } 
+           if (c.state > 0) { 
+             return p + ', ' + c.light.name + ' is on';
+           }
+         } 
+         return p;
+       }, "");
+       console.log(text);
+       callback(text);
+    });
   },
 
   // Handles requests to change the scenes inside of the house (i.e. set scene away,
