@@ -29,6 +29,21 @@ var Handler = {
       callback(util.format('Set the thermostat to %s', presence));
     });
   },
+
+  // Handles the thermostat_temperature_query intent (i.e. what is the current temperature in the house)
+  //
+  thermostat_temperature_query: function(response, callback) {
+    console.log('[nest.thermostat_temperature_query] response=%s', util.inspect(response, { depth: 2 } ));
+
+    nest.fetchStatus(function (data) {
+      for (var deviceId in data.device) {
+        if (data.device.hasOwnProperty(deviceId)) {
+          var device = data.shared[deviceId];
+          callback(util.format('The current temperature is %d degrees, thermostat is set to %d degrees. Auto-away is %s', nest.ctof(device.current_temperature), nest.ctof(device.target_temperature), device.auto_away));
+        }
+      }
+    });
+  }
 }
 
 module.exports = Handler;
